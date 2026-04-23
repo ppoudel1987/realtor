@@ -618,9 +618,13 @@
       <div class="scan-area" id="scan-area">
         <div class="scan-icon">📇</div>
         <div class="scan-title">Scan Business Card</div>
-        <div class="scan-sub">Take a photo or upload to auto-fill</div>
-        <button class="scan-btn" onclick="document.getElementById('card-upload').click()">📷 Scan Card</button>
-        <input type="file" id="card-upload" accept="image/*" capture="environment" onchange="processCard(this)">
+        <div class="scan-sub">Use camera or pick from your gallery</div>
+        <div style="display:flex;gap:8px;justify-content:center;position:relative;z-index:1;">
+          <button class="scan-btn" onclick="document.getElementById('card-camera').click()">📷 Camera</button>
+          <button class="scan-btn" onclick="document.getElementById('card-gallery').click()">🖼 Gallery</button>
+        </div>
+        <input type="file" id="card-camera" accept="image/*" capture="environment" onchange="processCard(this)" style="display:none">
+        <input type="file" id="card-gallery" accept="image/*" onchange="processCard(this)" style="display:none">
         <div class="scan-processing" id="scan-processing">✨ Reading card with AI…</div>
       </div>
 
@@ -992,7 +996,24 @@ async function processCard(input) {
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
-            { type: 'text', text: 'Extract contact info from this business card. Return ONLY a JSON object with these exact keys: fname, lname, brokerage, phone, email, area (city/neighborhood they serve if visible). Leave fields empty string if not found. No markdown, no explanation.' }
+            { type: 'text', text: `You are extracting contact information from a business card image. Look carefully at all text in the image including small print, logos, and any text on both sides if visible.
+
+Return ONLY a valid JSON object — no markdown, no backticks, no explanation, nothing else. Use exactly these keys:
+{
+  "fname": "first name only",
+  "lname": "last name only",
+  "brokerage": "company or brokerage name, including team name if present",
+  "phone": "best phone number (prefer mobile/cell over office if labeled)",
+  "email": "email address",
+  "area": "city or neighborhood they serve, if mentioned"
+}
+
+Rules:
+- If a field is not found, use empty string ""
+- For phone: format as found on the card, include area code
+- For brokerage: include the full company name (e.g. "Keller Williams Cypress" not just "KW")
+- If multiple phone numbers exist, prefer the one labeled cell/mobile
+- Names on real estate cards often include credentials like GRI, ABR — exclude those from the name fields` }
           ]
         }]
       })
