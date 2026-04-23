@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>RealtorNet — Your Referral Network</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink2: #2d2d4a;
+    --gold: #c9a84c;
+    --gold2: #e8c86d;
+    --cream: #f9f5ee;
+    --cream2: #f0e9d8;
+    --slate: #8a8aaa;
+    --white: #ffffff;
+    --met: #6c9bd2;
+    --nurturing: #e8a84c;
+    --active: #5bbf8a;
+    --top: #c9a84c;
+    --dormant: #a0a0c0;
+    --danger: #e05c5c;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(26,26,46,0.13);
+    --shadow-lg: 0 8px 40px rgba(26,26,46,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--ink);
+    padding: 20px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+  }
+  .logo span { color: var(--white); }
+  .header-actions { display: flex; gap: 8px; }
+  .btn-icon {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: var(--white);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-icon:hover { background: rgba(255,255,255,0.14); }
+
+  /* Pipeline filter */
+  .pipeline-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .pipeline-bar::-webkit-scrollbar { display: none; }
+  .pill {
+    flex-shrink: 0;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.18s;
+    color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.07);
+  }
+  .pill.active, .pill:hover { color: var(--white); }
+  .pill[data-stage="all"].active { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+  .pill[data-stage="Met"].active { background: var(--met); border-color: var(--met); color: white; }
+  .pill[data-stage="Nurturing"].active { background: var(--nurturing); border-color: var(--nurturing); color: white; }
+  .pill[data-stage="Active"].active { background: var(--active); border-color: var(--active); color: white; }
+  .pill[data-stage="Top Referrer"].active { background: var(--top); border-color: var(--top); color: var(--ink); }
+  .pill[data-stage="Dormant"].active { background: var(--dormant); border-color: var(--dormant); color: white; }
+
+  /* ── Main content ── */
+  .main { padding: 16px; padding-bottom: 100px; }
+
+  /* Stats strip */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(26,26,46,0.07);
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 9.5px;
+    color: var(--slate);
+    font-weight: 500;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* Search */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 11px 16px 11px 38px;
+    border-radius: 12px;
+    border: 1.5px solid var(--cream2);
+    background: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--gold); }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate);
+    font-size: 15px;
+  }
+
+  /* Realtor card */
+  .card-list { display: flex; flex-direction: column; gap: 10px; }
+  .realtor-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 1.5px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .realtor-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+  }
+  .realtor-card[data-stage="Met"]::before { background: var(--met); }
+  .realtor-card[data-stage="Nurturing"]::before { background: var(--nurturing); }
+  .realtor-card[data-stage="Active"]::before { background: var(--active); }
+  .realtor-card[data-stage="Top Referrer"]::before { background: var(--top); }
+  .realtor-card[data-stage="Dormant"]::before { background: var(--dormant); }
+  .realtor-card:active { transform: scale(0.98); box-shadow: 0 2px 12px rgba(26,26,46,0.10); }
+
+  .card-row1 { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+  .card-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .stage-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    margin-left: 8px;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-Met { background: #deeaf7; color: #3a6fa5; }
+  .badge-Nurturing { background: #fdf0dc; color: #b07a20; }
+  .badge-Active { background: #d8f2e7; color: #2a8a5a; }
+  .badge-Top { background: #fdf0d0; color: #8a6200; }
+  .badge-Dormant { background: #ebebf5; color: #6060a0; }
+
+  .card-brokerage {
+    font-size: 12.5px;
+    color: var(--slate);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .card-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11.5px;
+    color: var(--slate);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .card-meta span { display: flex; align-items: center; gap: 3px; }
+  .card-note {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--ink2);
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-style: italic;
+    border-left: 3px solid var(--cream2);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--slate);
+  }
+  .empty-state .big { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--ink); margin-bottom: 6px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* ── FAB ── */
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 50%;
+    transform: translateX(50%);
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 30px;
+    padding: 15px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(201,168,76,0.45);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    z-index: 200;
+    max-width: 390px;
+    width: calc(100% - 40px);
+    justify-content: center;
+  }
+  .fab:active { transform: translateX(50%) scale(0.97); box-shadow: 0 3px 12px rgba(201,168,76,0.3); }
+
+  /* ── Modal overlay ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.65);
+    z-index: 300;
+    align-items: flex-end;
+    backdrop-filter: blur(3px);
+  }
+  .overlay.open { display: flex; }
+
+  .sheet {
+    background: var(--white);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 0 0 32px;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: slideUp 0.28s cubic-bezier(0.22,1,0.36,1);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .sheet-handle {
+    width: 40px; height: 4px;
+    background: var(--cream2);
+    border-radius: 2px;
+    margin: 14px auto 0;
+  }
+  .sheet-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 21px;
+    color: var(--ink);
+    padding: 16px 20px 10px;
+    border-bottom: 1px solid var(--cream2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sheet-close {
+    background: var(--cream);
+    border: none;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--slate);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .sheet-body { padding: 16px 20px; }
+
+  /* Form styles */
+  .form-section {
+    margin-bottom: 20px;
+  }
+  .form-section-title {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-group { margin-bottom: 10px; }
+  .form-group label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--slate);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border-radius: 10px;
+    border: 1.5px solid var(--cream2);
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--gold); background: var(--white); }
+  .form-group textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  /* Stage selector */
+  .stage-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+  }
+  .stage-opt {
+    padding: 9px 6px;
+    border-radius: 10px;
+    border: 1.5px solid var(--cream2);
+    background: var(--cream);
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--slate);
+  }
+  .stage-opt.selected-Met { background: var(--met); border-color: var(--met); color: white; }
+  .stage-opt.selected-Nurturing { background: var(--nurturing); border-color: var(--nurturing); color: white; }
+  .stage-opt.selected-Active { background: var(--active); border-color: var(--active); color: white; }
+  .stage-opt.selected-Top { background: var(--top); border-color: var(--top); color: var(--ink); }
+  .stage-opt.selected-Dormant { background: var(--dormant); border-color: var(--dormant); color: white; }
+
+  /* Scan area */
+  .scan-area {
+    background: var(--ink);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scan-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.15) 0%, transparent 60%);
+  }
+  .scan-icon { font-size: 36px; margin-bottom: 8px; }
+  .scan-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--white); margin-bottom: 4px; }
+  .scan-sub { font-size: 12px; color: var(--slate); margin-bottom: 14px; }
+  .scan-btn {
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+  }
+  #card-upload { display: none; }
+  .scan-processing {
+    display: none;
+    font-size: 13px;
+    color: var(--gold2);
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .scan-processing.show { display: block; }
+
+  /* Submit btn */
+  .btn-submit {
+    width: 100%;
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-submit:hover { background: var(--ink2); }
+  .btn-submit.danger { background: var(--danger); }
+
+  /* Detail sheet */
+  .detail-avatar {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .detail-header {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cream2);
+  }
+  .detail-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--ink);
+  }
+  .detail-brokerage { font-size: 13px; color: var(--slate); font-weight: 500; margin-top: 2px; }
+
+  .detail-body { padding: 16px 20px; }
+  .detail-section { margin-bottom: 18px; }
+  .detail-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .detail-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--cream2);
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+  .detail-row a { color: var(--gold); text-decoration: none; font-weight: 500; }
+
+  .detail-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .btn-action {
+    padding: 11px;
+    border-radius: 12px;
+    border: 1.5px solid var(--cream2);
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--ink);
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .btn-action:hover { border-color: var(--gold); background: #fdf8ec; }
+  .btn-action.primary { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
+  /* Import/Export sheet */
+  .ie-option {
+    background: var(--cream);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    border: 1.5px solid var(--cream2);
+    cursor: pointer;
+    transition: border 0.15s;
+  }
+  .ie-option:hover { border-color: var(--gold); }
+  .ie-option h4 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .ie-option p { font-size: 12.5px; color: var(--slate); line-height: 1.5; }
+  #import-file { display: none; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo">Realtor<span>Net</span></div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="openIE()">⬆ Export</button>
+      <button class="btn-icon" onclick="openIE('import')">⬇ Import</button>
+    </div>
+  </div>
+  <div class="pipeline-bar">
+    <div class="pill active" data-stage="all" onclick="filterStage('all', this)">All</div>
+    <div class="pill" data-stage="Met" onclick="filterStage('Met', this)">Met</div>
+    <div class="pill" data-stage="Nurturing" onclick="filterStage('Nurturing', this)">Nurturing</div>
+    <div class="pill" data-stage="Active" onclick="filterStage('Active', this)">Active</div>
+    <div class="pill" data-stage="Top Referrer" onclick="filterStage('Top Referrer', this)">Top Referrer</div>
+    <div class="pill" data-stage="Dormant" onclick="filterStage('Dormant', this)">Dormant</div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="stats-strip" id="stats-strip"></div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="Search by name, brokerage, area…" oninput="renderList()">
+  </div>
+  <div class="card-list" id="card-list"></div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAdd()">＋ Add Realtor</button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ADD / EDIT SHEET -->
+<div class="overlay" id="overlay-add" onclick="closeAdd(event)">
+  <div class="sheet" id="sheet-add">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      <span id="sheet-add-title">Add Realtor</span>
+      <button class="sheet-close" onclick="closeAddSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+
+      <!-- Scan area -->
+      <div class="scan-area" id="scan-area">
+        <div class="scan-icon">📇</div>
+        <div class="scan-title">Scan Business Card</div>
+        <div class="scan-sub">Take a photo or upload to auto-fill</div>
+        <button class="scan-btn" onclick="document.getElementById('card-upload').click()">📷 Scan Card</button>
+        <input type="file" id="card-upload" accept="image/*" capture="environment" onchange="processCard(this)">
+        <div class="scan-processing" id="scan-processing">✨ Reading card with AI…</div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Contact Info</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="f-fname" placeholder="Maria">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="f-lname" placeholder="Garcia">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Brokerage / Team</label>
+          <input type="text" id="f-brokerage" placeholder="Keller Williams Cypress">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="f-phone" placeholder="(832) 555-0100">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="f-email" placeholder="maria@kw.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Profile</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Farm Area</label>
+            <input type="text" id="f-area" placeholder="Cypress, Katy…">
+          </div>
+          <div class="form-group">
+            <label>Specialty</label>
+            <select id="f-specialty">
+              <option value="">— Select —</option>
+              <option>Buyer's Agent</option>
+              <option>Listing Agent</option>
+              <option>Both</option>
+              <option>New Construction</option>
+              <option>Luxury</option>
+              <option>Investor-Friendly</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Where We Met</label>
+            <input type="text" id="f-met-where" placeholder="Cy-Fair event, open house…">
+          </div>
+          <div class="form-group">
+            <label>Date Met</label>
+            <input type="date" id="f-met-date">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Pipeline Stage</div>
+        <div class="stage-selector">
+          <div class="stage-opt" data-val="Met" onclick="selectStage(this)">🤝 Met</div>
+          <div class="stage-opt" data-val="Nurturing" onclick="selectStage(this)">🌱 Nurturing</div>
+          <div class="stage-opt" data-val="Active" onclick="selectStage(this)">⚡ Active</div>
+          <div class="stage-opt" data-val="Top Referrer" onclick="selectStage(this)">⭐ Top Referrer</div>
+          <div class="stage-opt" data-val="Dormant" onclick="selectStage(this)">💤 Dormant</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Notes</div>
+        <div class="form-group">
+          <textarea id="f-notes" placeholder="First impression, what they mentioned, follow-up ideas…"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btn-save" onclick="saveRealtor()">Save Realtor</button>
+      <button class="btn-submit danger" id="btn-delete" style="display:none;margin-top:8px;" onclick="deleteRealtor()">Delete Contact</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL SHEET -->
+<div class="overlay" id="overlay-detail" onclick="closeDetail(event)">
+  <div class="sheet" id="sheet-detail">
+    <div class="sheet-handle"></div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- EXPORT/IMPORT SHEET -->
+<div class="overlay" id="overlay-ie" onclick="closeIE(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      Data Management
+      <button class="sheet-close" onclick="document.getElementById('overlay-ie').classList.remove('open')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="ie-option" onclick="doExport()">
+        <h4>⬆ Export My Data</h4>
+        <p>Download all your realtors as a backup file. Do this before every upgrade.</p>
+      </div>
+      <div class="ie-option" onclick="document.getElementById('import-file').click()">
+        <h4>⬇ Import Data</h4>
+        <p>Load a previously exported file to restore your contacts.</p>
+      </div>
+      <input type="file" id="import-file" accept=".json" onchange="doImport(this)">
+      <div class="ie-option" onclick="if(confirm('Clear ALL data? This cannot be undone.')) { localStorage.removeItem(STORAGE_KEY); realtors=[]; renderAll(); document.getElementById(\'overlay-ie\').classList.remove(\'open\'); showToast(\'All data cleared\'); }">
+        <h4 style="color:var(--danger)">🗑 Clear All Data</h4>
+        <p>Permanently remove all contacts. Export first!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'realtornet_v1';
+let realtors = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let currentFilter = 'all';
+let editingId = null;
+let selectedStage = '';
+
+// ── Persist ──
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(realtors)); }
+
+// ── Render ──
+function renderAll() { renderStats(); renderList(); }
+
+function renderStats() {
+  const stages = ['Met','Nurturing','Active','Top Referrer','Dormant'];
+  const counts = {};
+  stages.forEach(s => counts[s] = realtors.filter(r => r.stage === s).length);
+  document.getElementById('stats-strip').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${realtors.length}</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--active)">${counts['Active']}</div><div class="stat-label">Active</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--top)">${counts['Top Referrer']}</div><div class="stat-label">Top Ref</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--nurturing)">${counts['Nurturing']}</div><div class="stat-label">Nurturing</div></div>
+  `;
+}
+
+function renderList() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  let list = realtors.filter(r => {
+    const matchStage = currentFilter === 'all' || r.stage === currentFilter;
+    const matchQ = !q || `${r.fname} ${r.lname} ${r.brokerage} ${r.area}`.toLowerCase().includes(q);
+    return matchStage && matchQ;
+  });
+  list.sort((a,b) => {
+    const order = {'Top Referrer':0,'Active':1,'Nurturing':2,'Met':3,'Dormant':4};
+    return (order[a.stage]||5) - (order[b.stage]||5);
+  });
+
+  const el = document.getElementById('card-list');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="big">🤝</div>
+      <h3>${realtors.length ? 'No matches' : 'No realtors yet'}</h3>
+      <p>${realtors.length ? 'Try a different filter or search.' : 'Tap the button below to add your first realtor contact.'}</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(r => {
+    const badgeKey = r.stage === 'Top Referrer' ? 'Top' : r.stage;
+    return `
+    <div class="realtor-card" data-stage="${r.stage}" onclick="openDetail('${r.id}')">
+      <div class="card-row1">
+        <div class="card-name">${r.fname} ${r.lname}</div>
+        <div class="stage-badge badge-${badgeKey}">${r.stage}</div>
+      </div>
+      <div class="card-brokerage">${r.brokerage || '—'}</div>
+      <div class="card-meta">
+        ${r.phone ? `<span>📞 ${r.phone}</span>` : ''}
+        ${r.area ? `<span>📍 ${r.area}</span>` : ''}
+        ${r.specialty ? `<span>🏠 ${r.specialty}</span>` : ''}
+        ${r.metDate ? `<span>📅 ${r.metDate}</span>` : ''}
+      </div>
+      ${r.notes ? `<div class="card-note">${r.notes.substring(0,100)}${r.notes.length>100?'…':''}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function filterStage(stage, el) {
+  currentFilter = stage;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+// ── Add / Edit ──
+function openAdd() {
+  editingId = null;
+  selectedStage = '';
+  document.getElementById('sheet-add-title').textContent = 'Add Realtor';
+  document.getElementById('btn-delete').style.display = 'none';
+  clearForm();
+  document.getElementById('scan-area').style.display = 'block';
+  document.getElementById('overlay-add').classList.add('open');
+}
+
+function clearForm() {
+  ['f-fname','f-lname','f-brokerage','f-phone','f-email','f-area','f-notes','f-met-where'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('f-specialty').value = '';
+  document.getElementById('f-met-date').value = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('.stage-opt').forEach(o => o.className = 'stage-opt');
+  selectedStage = '';
+}
+
+function closeAdd(e) { if (e.target.id === 'overlay-add') closeAddSheet(); }
+function closeAddSheet() { document.getElementById('overlay-add').classList.remove('open'); }
+
+function selectStage(el) {
+  document.querySelectorAll('.stage-opt').forEach(o => o.className = 'stage-opt');
+  const val = el.dataset.val;
+  const cls = val === 'Top Referrer' ? 'Top' : val;
+  el.classList.add('selected-' + cls);
+  selectedStage = val;
+}
+
+function saveRealtor() {
+  const fname = document.getElementById('f-fname').value.trim();
+  const lname = document.getElementById('f-lname').value.trim();
+  if (!fname && !lname) { showToast('Please enter a name'); return; }
+  if (!selectedStage) { showToast('Please select a pipeline stage'); return; }
+
+  const data = {
+    id: editingId || Date.now().toString(),
+    fname, lname,
+    brokerage: document.getElementById('f-brokerage').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    area: document.getElementById('f-area').value.trim(),
+    specialty: document.getElementById('f-specialty').value,
+    metWhere: document.getElementById('f-met-where').value.trim(),
+    metDate: document.getElementById('f-met-date').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    stage: selectedStage,
+    createdAt: editingId ? (realtors.find(r=>r.id===editingId)||{}).createdAt : Date.now()
+  };
+
+  if (editingId) {
+    const idx = realtors.findIndex(r => r.id === editingId);
+    if (idx > -1) realtors[idx] = data;
+  } else {
+    realtors.push(data);
+  }
+  save();
+  renderAll();
+  closeAddSheet();
+  showToast(editingId ? 'Contact updated ✓' : 'Realtor added ✓');
+}
+
+function deleteRealtor() {
+  if (!editingId) return;
+  if (!confirm('Delete this contact?')) return;
+  realtors = realtors.filter(r => r.id !== editingId);
+  save();
+  renderAll();
+  closeAddSheet();
+  showToast('Contact deleted');
+}
+
+// ── Detail ──
+function openDetail(id) {
+  const r = realtors.find(x => x.id === id);
+  if (!r) return;
+  const initials = ((r.fname||'?')[0] + (r.lname||'')[0]).toUpperCase();
+  const badgeKey = r.stage === 'Top Referrer' ? 'Top' : r.stage;
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-avatar">${initials}</div>
+      <div>
+        <div class="detail-name">${r.fname} ${r.lname}</div>
+        <div class="detail-brokerage">${r.brokerage || 'No brokerage listed'}</div>
+        <div style="margin-top:5px"><span class="stage-badge badge-${badgeKey}">${r.stage}</span></div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-title">Contact</div>
+        ${r.phone ? `<div class="detail-row"><span class="icon">📞</span><a href="tel:${r.phone}">${r.phone}</a></div>` : ''}
+        ${r.email ? `<div class="detail-row"><span class="icon">✉️</span><a href="mailto:${r.email}">${r.email}</a></div>` : ''}
+        ${!r.phone && !r.email ? `<div class="detail-row"><span class="icon">—</span>No contact info</div>` : ''}
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Profile</div>
+        ${r.area ? `<div class="detail-row"><span class="icon">📍</span>${r.area}</div>` : ''}
+        ${r.specialty ? `<div class="detail-row"><span class="icon">🏠</span>${r.specialty}</div>` : ''}
+        ${r.metWhere ? `<div class="detail-row"><span class="icon">🤝</span>Met at: ${r.metWhere}</div>` : ''}
+        ${r.metDate ? `<div class="detail-row"><span class="icon">📅</span>${r.metDate}</div>` : ''}
+      </div>
+      ${r.notes ? `<div class="detail-section">
+        <div class="detail-section-title">Notes</div>
+        <div style="font-size:13.5px;line-height:1.6;color:var(--ink2)">${r.notes}</div>
+      </div>` : ''}
+      <div class="detail-actions">
+        <button class="btn-action primary" onclick="editRealtor('${r.id}')">✏️ Edit</button>
+        ${r.phone ? `<button class="btn-action" onclick="window.location='sms:${r.phone}'">💬 Text</button>` : '<button class="btn-action" disabled style="opacity:0.4">💬 Text</button>'}
+        ${r.phone ? `<button class="btn-action" onclick="window.location='tel:${r.phone}'">📞 Call</button>` : '<button class="btn-action" disabled style="opacity:0.4">📞 Call</button>'}
+        ${r.email ? `<button class="btn-action" onclick="window.location='mailto:${r.email}'">✉️ Email</button>` : '<button class="btn-action" disabled style="opacity:0.4">✉️ Email</button>'}
+      </div>
+    </div>
+  `;
+  document.getElementById('overlay-detail').classList.add('open');
+}
+
+function closeDetail(e) { if (e.target.id === 'overlay-detail') document.getElementById('overlay-detail').classList.remove('open'); }
+
+function editRealtor(id) {
+  document.getElementById('overlay-detail').classList.remove('open');
+  const r = realtors.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  selectedStage = r.stage;
+  document.getElementById('sheet-add-title').textContent = 'Edit Realtor';
+  document.getElementById('btn-delete').style.display = 'block';
+  document.getElementById('scan-area').style.display = 'none';
+  document.getElementById('f-fname').value = r.fname || '';
+  document.getElementById('f-lname').value = r.lname || '';
+  document.getElementById('f-brokerage').value = r.brokerage || '';
+  document.getElementById('f-phone').value = r.phone || '';
+  document.getElementById('f-email').value = r.email || '';
+  document.getElementById('f-area').value = r.area || '';
+  document.getElementById('f-specialty').value = r.specialty || '';
+  document.getElementById('f-met-where').value = r.metWhere || '';
+  document.getElementById('f-met-date').value = r.metDate || '';
+  document.getElementById('f-notes').value = r.notes || '';
+  document.querySelectorAll('.stage-opt').forEach(o => {
+    o.className = 'stage-opt';
+    if (o.dataset.val === r.stage) {
+      const cls = r.stage === 'Top Referrer' ? 'Top' : r.stage;
+      o.classList.add('selected-' + cls);
+    }
+  });
+  document.getElementById('overlay-add').classList.add('open');
+}
+
+// ── AI Card Scan ──
+async function processCard(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const proc = document.getElementById('scan-processing');
+  proc.classList.add('show');
+
+  const base64 = await new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result.split(',')[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
+            { type: 'text', text: 'Extract contact info from this business card. Return ONLY a JSON object with these exact keys: fname, lname, brokerage, phone, email, area (city/neighborhood they serve if visible). Leave fields empty string if not found. No markdown, no explanation.' }
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const info = JSON.parse(clean);
+    if (info.fname) document.getElementById('f-fname').value = info.fname;
+    if (info.lname) document.getElementById('f-lname').value = info.lname;
+    if (info.brokerage) document.getElementById('f-brokerage').value = info.brokerage;
+    if (info.phone) document.getElementById('f-phone').value = info.phone;
+    if (info.email) document.getElementById('f-email').value = info.email;
+    if (info.area) document.getElementById('f-area').value = info.area;
+    showToast('Card scanned ✓ — review and save');
+  } catch(e) {
+    showToast('Could not read card — fill in manually');
+  }
+  proc.classList.remove('show');
+  input.value = '';
+}
+
+// ── Export / Import ──
+function openIE(mode) {
+  document.getElementById('overlay-ie').classList.add('open');
+  if (mode === 'import') setTimeout(() => document.getElementById('import-file').click(), 400);
+}
+function closeIE(e) { if (e.target.id === 'overlay-ie') document.getElementById('overlay-ie').classList.remove('open'); }
+
+function doExport() {
+  const blob = new Blob([JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), realtors }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `realtornet-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Exported ✓ — file saved to your downloads');
+  document.getElementById('overlay-ie').classList.remove('open');
+}
+
+function doImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = data.realtors || data;
+      if (!Array.isArray(imported)) throw new Error('Invalid format');
+      const merge = confirm(`Import ${imported.length} contacts?\n\nMerge with existing (OK) or Replace all (Cancel)?`);
+      if (merge) {
+        const ids = new Set(realtors.map(r => r.id));
+        imported.forEach(r => { if (!ids.has(r.id)) realtors.push(r); });
+      } else {
+        realtors = imported;
+      }
+      save();
+      renderAll();
+      showToast(`Imported ${imported.length} contacts ✓`);
+      document.getElementById('overlay-ie').classList.remove('open');
+    } catch(err) {
+      showToast('Import failed — invalid file');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Init ──
+renderAll();
+</script>
+</body>
+</html>
