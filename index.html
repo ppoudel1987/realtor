@@ -975,65 +975,97 @@ function editRealtor(id) {
 async function processCard(input) {
   const file = input.files[0];
   if (!file) return;
+
   const proc = document.getElementById('scan-processing');
+  proc.textContent = '✨ Reading card with AI…';
   proc.classList.add('show');
 
-  const base64 = await new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = () => res(reader.result.split(',')[1]);
-    reader.onerror = rej;
-    reader.readAsDataURL(file);
-  });
+  // Resize + convert to JPEG (handles HEIC and large files)
+  let base64;
+  try {
+    base64 = await resizeAndEncode(file);
+  } catch(e) {
+    proc.classList.remove('show');
+    showToast('Could not load image — try again');
+    input.value = '';
+    return;
+  }
 
+  proc.textContent = '✨ Sending to AI…';
+
+  let responseText = '';
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        max_tokens: 500,
         messages: [{
           role: 'user',
           content: [
-            { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
-            { type: 'text', text: `You are extracting contact information from a business card image. Look carefully at all text in the image including small print, logos, and any text on both sides if visible.
-
-Return ONLY a valid JSON object — no markdown, no backticks, no explanation, nothing else. Use exactly these keys:
-{
-  "fname": "first name only",
-  "lname": "last name only",
-  "brokerage": "company or brokerage name, including team name if present",
-  "phone": "best phone number (prefer mobile/cell over office if labeled)",
-  "email": "email address",
-  "area": "city or neighborhood they serve, if mentioned"
-}
-
-Rules:
-- If a field is not found, use empty string ""
-- For phone: format as found on the card, include area code
-- For brokerage: include the full company name (e.g. "Keller Williams Cypress" not just "KW")
-- If multiple phone numbers exist, prefer the one labeled cell/mobile
-- Names on real estate cards often include credentials like GRI, ABR — exclude those from the name fields` }
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+            { type: 'text', text: 'This is a business card. Extract the contact info and return ONLY a JSON object with keys: fname, lname, brokerage, phone, email, area. Use empty string for missing fields. No markdown, no explanation, just JSON.' }
           ]
         }]
       })
     });
+
+    if (!response.ok) {
+      proc.classList.remove('show');
+      showToast('API error ' + response.status + ' — try again');
+      input.value = '';
+      return;
+    }
+
     const data = await response.json();
-    const text = data.content.map(i => i.text || '').join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const info = JSON.parse(clean);
-    if (info.fname) document.getElementById('f-fname').value = info.fname;
-    if (info.lname) document.getElementById('f-lname').value = info.lname;
-    if (info.brokerage) document.getElementById('f-brokerage').value = info.brokerage;
-    if (info.phone) document.getElementById('f-phone').value = info.phone;
-    if (info.email) document.getElementById('f-email').value = info.email;
-    if (info.area) document.getElementById('f-area').value = info.area;
-    showToast('Card scanned ✓ — review and save');
+    responseText = (data.content || []).map(i => i.text || '').join('').trim();
+
+    // Extract JSON even if model wraps it in markdown
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in response');
+
+    const info = JSON.parse(jsonMatch[0]);
+    let filled = 0;
+    if (info.fname)     { document.getElementById('f-fname').value = info.fname; filled++; }
+    if (info.lname)     { document.getElementById('f-lname').value = info.lname; filled++; }
+    if (info.brokerage) { document.getElementById('f-brokerage').value = info.brokerage; filled++; }
+    if (info.phone)     { document.getElementById('f-phone').value = info.phone; filled++; }
+    if (info.email)     { document.getElementById('f-email').value = info.email; filled++; }
+    if (info.area)      { document.getElementById('f-area').value = info.area; filled++; }
+
+    showToast(filled > 0 ? '✓ Filled ' + filled + ' fields — review and save' : 'Card read but no info found — fill in manually');
+
   } catch(e) {
-    showToast('Could not read card — fill in manually');
+    const hint = responseText ? responseText.substring(0, 80) : 'Check your internet connection';
+    showToast('Scan failed: ' + hint);
   }
+
   proc.classList.remove('show');
   input.value = '';
+}
+
+// Resize to max 1200px wide/tall and encode as JPEG base64
+function resizeAndEncode(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX = 1200;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.88).split(',')[1]);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
 }
 
 // ── Export / Import ──
